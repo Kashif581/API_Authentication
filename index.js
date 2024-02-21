@@ -8,7 +8,7 @@ const API_URL = "https://secrets-api.appbrewery.com";
 //TODO 1: Fill in your values for the 3 types of auth.
 const yourUsername = "Abdullah";
 const yourPassword = "pass";
-const yourAPIKey = "594149ed-9960-4a1d-bfcf-710f2d37b6da";
+const yourAPIKey = "5733316e-2f01-4b6d-80ab-dcd7500e878a";
 const yourBearerToken = "7754f502-4764-4a54-96d3-3581c40549e5";
 
 app.get("/", (req, res) => {
@@ -28,10 +28,7 @@ app.get("/noAuth", async (req, res) => {
   } catch(error) {
     res.status(404).send(error.message);
   }
-  
-  
-  
-  
+   
 });
 
 // Basic Authentication
@@ -49,48 +46,39 @@ app.get("/noAuth", async (req, res) => {
   */
 app.get("/basicAuth", async (req, res) => {
   try{
-    const response = await axios.get(API_URL + "/all?page=2", {
+    const response = await axios.get(API_URL + "/all?page=2",{}, {
       auth: {
         username: yourUsername,
         password: yourPassword,
       },
     });
-    const result = response.data;
-    console.log(result)
-    const data = JSON.stringify(result);
-    res.render("index.js", { content : data})
+    res.render("index.ejs", { content : JSON.stringify(response.data)})
   } catch(error) {
     res.status(404).send(error.message)
   }
   
-  
 });
+
 //  API Key Authentication 
 //TODO 4: Write your code here to hit up the /filter endpoint
   //Filter for all secrets with an embarassment score of 5 or greater
   //HINT: You need to provide a query parameter of apiKey in the request.
 app.get("/apiKey", async (req, res) => {
   try {
-    const response = await axios.get(API_URL + "/filter", {
+    const response = await axios.get(API_URL + "/filter",  {
       params: {
         score: 5,
         apiKey: yourAPIKey,
       },
     });
-      const result = response.data;
-      const data = JSON.stringify(result);
-      res.render("index.js", { content : data})
-  
+    res.render("index.ejs", { content : JSON.stringify(response.data)})
     } catch(error) {
       res.status(404).send(error.message)
     }
   });
-  
 
-  
-
-app.get("/bearerToken", (req, res) => {
-  //TODO 5: Write your code here to hit up the /secrets/{id} endpoint
+// BearerToken Authorization
+//TODO 5: Write your code here to hit up the /secrets/{id} endpoint
   //and get the secret with id of 42
   //HINT: This is how you can use axios to do bearer token auth:
   // https://stackoverflow.com/a/52645402
@@ -101,6 +89,18 @@ app.get("/bearerToken", (req, res) => {
     },
   });
   */
+const config = {
+  headers : {Authorization : `Bearer ${yourBearerToken}`}
+};
+app.get("/bearerToken", async (req, res) => {
+  try{
+    const response = await axios.get(API_URL + "/secrets/1", config)
+    res.render("index.ejs", { content : JSON.stringify(response.data)});
+} catch(error) {
+  res.status(404).send(error.message)
+
+} 
+
 });
 
 app.listen(port, () => {
